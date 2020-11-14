@@ -1,0 +1,9 @@
+# IDE/tools
+__pycache__
+*.bak
+scratch.py
+
+# Build
+/build
+/dist
+/*.egg-info
