@@ -1,7 +1,15 @@
 # mp_boilerplate
 
-A collection of patterns to use over top of the built in multiprocessing package
+A collection of patterns to use over top of the built in multiprocessing package.
 
+# Install
+
+```{shell}
+pip install mp_boilerplate
+```
+
+
+# Use Case
 
 ```{py}
 def process_int(i):

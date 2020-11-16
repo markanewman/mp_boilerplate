@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name = "mp_boilerplate",
-    version = "0.0.1",
+    version = "0.2.1",
     author = '@markanewman',
     author_email = 'mp_boilerplate@trinetteandmark.com',
     description = 'A collection of patterns to use over top of the built in multiprocessing package',
@@ -29,5 +29,5 @@ setuptools.setup(
     ],
     python_requires = '>=3.6, <4',
     install_requires = [
-        "typeguard==2.7.1"]
+        "typeguard>=2.7.1,<3.0.0"]
 )
