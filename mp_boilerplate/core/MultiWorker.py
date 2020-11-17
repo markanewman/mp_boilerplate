@@ -9,7 +9,16 @@ class MultiWorker:
     _finished_adding = False
 
     @typechecked
-    def __init__(self, job: callable, init: callable = None, init_args: t.Optional[tuple] = None, worker_count: int = mp.cpu_count()) -> None:
+    def __init__(
+        self,
+        job: t.Callable[..., t.Any],
+        init: t.Callable[..., t.Any] = None,
+        init_args: t.Union[tuple, t.Any] = (),
+        worker_count: int = mp.cpu_count()) -> None:
+        assert job is not None
+        assert init_args is not None
+        assert worker_count > 0
+
         self._tasks = mp.Queue()
         self._results = mp.Queue()
         self._workers = []
@@ -18,11 +27,10 @@ class MultiWorker:
         self._overlord = Thread(target = MultiWorker._overlord, args = (self._workers, self._tasks, self._results))
 
     @staticmethod
-    @typechecked
-    def _worker(job: callable, init: callable, init_args: t.Optional[tuple], tasks: mp.Queue, results: mp.Queue) -> None:
+    def _worker(job: callable, init: callable, init_args: tuple, tasks: mp.Queue, results: mp.Queue) -> None:
         state = None
         if init is not None:
-            state = init(init_args)
+            state = init(*init_args)
         while True:
             item = tasks.get()
             if item == MultiWorker._sentinel:
@@ -36,7 +44,6 @@ class MultiWorker:
                 results.put(result)
 
     @staticmethod
-    @typechecked
     def _overlord(workers: t.List[mp.Process], tasks: mp.Queue, results: mp.Queue) -> None:
         for worker in workers:
             worker.join()
