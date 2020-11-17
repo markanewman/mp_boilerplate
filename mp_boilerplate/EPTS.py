@@ -21,7 +21,6 @@ class EPTS:
         self._save = Thread(target = EPTS._save_wrapper, args = (self._transform, save, save_args, show_progress))
 
     @staticmethod
-    @typechecked
     def _extract_wrapper(worker: MultiWorker, fn: callable, args: t.Optional[tuple]) -> None:
         iterator = fn() if args is None else fn(args)
         for item in iterator:
@@ -29,7 +28,6 @@ class EPTS:
         worker.finished_adding_tasks()
 
     @staticmethod
-    @typechecked
     def _save_wrapper(worker: MultiWorker, fn: callable, args: t.Optional[tuple], show_progress: bool) -> None:
         res1 = worker.get_results()
         res2 = res1 if not show_progress else EPTS._progress(res1)
@@ -37,7 +35,6 @@ class EPTS:
         fn(args)
 
     @staticmethod
-    @typechecked
     def _progress(items: t.Iterator) -> t.Iterator:
         bar_i = 0
         widgets = [ 'Saving Items # ', pb.Counter(), ' ', pb.Timer(), ' ', pb.BouncingBar(marker = '.', left = '[', right = ']')]
