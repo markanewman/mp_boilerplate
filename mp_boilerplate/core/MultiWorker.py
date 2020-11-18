@@ -30,7 +30,12 @@ class MultiWorker:
     def _worker(job: callable, init: callable, init_args: tuple, tasks: mp.Queue, results: mp.Queue) -> None:
         state = None
         if init is not None:
-            state = init(*init_args)
+            if type(init_args) != tuple:
+                state = init(init_args)
+            elif len(init_args) == 0:
+                state = init()
+            else:
+                state = init(*init_args)
         while True:
             item = tasks.get()
             if item == MultiWorker._sentinel:
