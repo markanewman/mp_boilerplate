@@ -25,7 +25,7 @@ class EPTS:
             Function that processes items in the form `def transform(item) -> item` or `def transform(state, item) -> item`
         save : callable
             Function that saves processed items in the form `def save(iterator, *args) -> none`.
-            Per PEP 484, there is no support for some, but not all of the function arguments to be typed.
+            **NOTE:** Per PEP 484, there is no support for some, but not all, of the function arguments to be typed.
         transform_init : callable
             Function for creating shared state in the background workers in the form `def transform_init(*args) -> item`
         extract_args : tuple
@@ -53,7 +53,12 @@ class EPTS:
 
     @staticmethod
     def _extract_wrapper(worker: MultiWorker, fn: callable, args: tuple) -> None:
-        iterator = fn() if len(args) == 0 else fn(*args)
+        if type(args) != tuple:
+            iterator = fn(args)
+        elif len(args) == 0:
+            iterator = fn()
+        else:
+            iterator = fn(*args)
         for item in iterator:
             worker.add_task(item)
         worker.finished_adding_tasks()
@@ -62,7 +67,9 @@ class EPTS:
     def _save_wrapper(worker: MultiWorker, fn: callable, args: tuple, show_progress: bool) -> None:
         res1 = worker.get_results()
         res2 = res1 if not show_progress else EPTS._progress(res1)
-        if len(args) == 0:
+        if type(args) != tuple:
+            fn(res2, args)
+        elif len(args) == 0:
             fn(res2)
         else:
             fn(res2, *args)
