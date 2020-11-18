@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name = "mp_boilerplate",
-    version = "0.3.3",
+    version = "0.3.4",
     author = '@markanewman',
     author_email = 'mp_boilerplate@trinetteandmark.com',
     description = 'A collection of patterns to use over top of the built in multiprocessing package',

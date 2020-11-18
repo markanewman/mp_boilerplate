@@ -1,3 +1,4 @@
+import time
 import multiprocessing as mp
 import progressbar as pb
 import typing as t
@@ -6,7 +7,7 @@ from typeguard import typechecked
 from .core.MultiWorker import MultiWorker
 
 class EPTS:
-    
+
     @typechecked
     def __init__(
         self,
@@ -48,11 +49,11 @@ class EPTS:
         assert worker_count > 0
         
         self._transform = MultiWorker(transform, transform_init, transform_init_args, worker_count)
-        self._extract = Thread(target = EPTS._extract_wrapper, args = (self._transform, extract, extract_args))
+        self._extract = Thread(target = EPTS._extract_wrapper, args = (self, self._transform, extract, extract_args))
         self._save = Thread(target = EPTS._save_wrapper, args = (self._transform, save, save_args, show_progress))
 
     @staticmethod
-    def _extract_wrapper(worker: MultiWorker, fn: callable, args: tuple) -> None:
+    def _extract_wrapper(cls, worker: MultiWorker, fn: callable, args: tuple) -> None:
         if type(args) != tuple:
             iterator = fn(args)
         elif len(args) == 0:
@@ -61,7 +62,17 @@ class EPTS:
             iterator = fn(*args)
         for item in iterator:
             worker.add_task(item)
+            EPTS._rate_limiter(cls)
         worker.finished_adding_tasks()
+
+    @staticmethod
+    def _rate_limiter(cls) -> None:
+        wlen = len(cls._transform._workers)
+        if cls._transform._tasks.qsize() > wlen * wlen:
+            nap = (time.time() - cls._last_no_sleep)/wlen
+            time.sleep(nap)
+        else:
+            cls._last_no_sleep = time.time()
 
     @staticmethod
     def _save_wrapper(worker: MultiWorker, fn: callable, args: tuple, show_progress: bool) -> None:
